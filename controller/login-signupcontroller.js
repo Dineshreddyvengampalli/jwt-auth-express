@@ -1,5 +1,6 @@
 const User = require('../model/user')
 const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 const signup = async(req,res)=>{
     try {
@@ -14,7 +15,7 @@ const signup = async(req,res)=>{
             try {
                 let savedUser = await user.save()
                 if(savedUser){
-                    let jwtToken = jwt.sign({email : email},'sampleSecret')
+                    let jwtToken = jwt.sign({email : email},process.env.jwtSecret)
                     return res.send({"message" : "signup sucess","token" : jwtToken})        
                 }
                 else{
@@ -41,7 +42,7 @@ const login = async (req,res)=>{
         if(user.length > 0){
             let userDetails = user[0]
         if(userDetails.password == password){
-            let jwtToken = jwt.sign({email : email},'sampleSecret')
+            let jwtToken = jwt.sign({email : email},process.env.jwtSecret)
             return res.send({"message" : "login sucess","token" : jwtToken})
 
         }else{

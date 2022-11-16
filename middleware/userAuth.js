@@ -8,8 +8,11 @@ const loginAuth = async (req,res)=>{
         let user = await User.find({email : email})
         if(user.length > 0){
             let userDetails = user[0]
+            console.log(userDetails)
         if(userDetails.password == password){
-            let jwtToken = jwt.sign({email : email},process.env.jwtSecret)
+            console.log(userDetails)
+            let payload = {email : userDetails.email,name : userDetails.userName}
+            let jwtToken = await jwt.sign(payload,process.env.jwtSecret, {expiresIn : '1h'})
             return res.send({"message" : "login sucess","token" : jwtToken})
         }else{
             return res.status(404).send('invalid cred')
@@ -24,19 +27,21 @@ const loginAuth = async (req,res)=>{
 
 }
 
-const authorizer = (req,res,next)=>{
+const authorizer = async(req,res,next)=>{
     try {
         let authToken = req.headers.authorization.split(' ')[1];
         if(authToken){
-            let decoded = jwt.verify(authToken,process.env.jwtSecret)
+            let decoded = await  jwt.verify(authToken,process.env.jwtSecret)
+            console.log(decoded)
             req.user = decoded
+
             return next()
             
         }else{
             res.status(401).send('un authorized')
         }
     } catch (error) {
-        res.status(401).send('un authorized')
+        res.status(401).send(error)
     }
 }
 
